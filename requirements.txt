@@ -3,3 +3,6 @@ opencv-python
 gpiozero
 lgpio
 python-dotenv
+pynput
+sounddevice
+numpy
