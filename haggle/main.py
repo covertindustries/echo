@@ -21,6 +21,7 @@ from database import (
     seed_sample_data, get_item_suggestions,
     create_vendor_story, get_vendor_story,
     add_vendor_photo, get_vendor_stories_for_city,
+    waitlist_add, waitlist_count, waitlist_referral_count, waitlist_city_counts,
 )
 from scraper import scrape_reddit_prices
 from negotiator import stream_negotiation_advice
@@ -117,6 +118,9 @@ async def app_ui():
 
 class WaitlistEntry(BaseModel):
     email: str = Field(..., min_length=5, max_length=200)
+    city: Optional[str] = Field(None, max_length=60)
+    role: str = Field(default="traveller")          # traveller | vendor | both
+    ref: Optional[str] = Field(None, max_length=8)  # referral code
 
 
 @app.post("/api/waitlist", status_code=201)
@@ -124,12 +128,40 @@ async def api_waitlist(body: WaitlistEntry):
     import re
     if not re.match(r"[^@]+@[^@]+\.[^@]+", body.email):
         raise HTTPException(400, "Invalid email")
+    if body.role not in ("traveller", "vendor", "both"):
+        raise HTTPException(400, "Invalid role")
 
-    waitlist_path = os.path.join(BASE_DIR, "waitlist.csv")
-    from datetime import datetime
-    with open(waitlist_path, "a") as f:
-        f.write(f"{body.email},{datetime.utcnow().isoformat()}\n")
-    return {"message": "You're on the list!"}
+    result = waitlist_add(
+        email=body.email,
+        city=body.city or None,
+        role=body.role,
+        referred_by=body.ref or None,
+    )
+    total = waitlist_count()
+    return {
+        "ref_code": result["ref_code"],
+        "position": result.get("position", total),
+        "total": total,
+        "already_registered": result.get("already_registered", False),
+        "share_url": f"/?ref={result['ref_code']}",
+        "message": "You're on the list!",
+    }
+
+
+@app.get("/api/waitlist/count")
+async def api_waitlist_count():
+    return {"count": waitlist_count()}
+
+
+@app.get("/api/waitlist/referrals/{ref_code}")
+async def api_waitlist_referrals(ref_code: str):
+    count = waitlist_referral_count(ref_code.upper())
+    return {"ref_code": ref_code.upper(), "referrals": count}
+
+
+@app.get("/api/waitlist/cities")
+async def api_waitlist_cities():
+    return {"cities": waitlist_city_counts()}
 
 
 # ── Item suggestions ──────────────────────────────────────────

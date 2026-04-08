@@ -18,6 +18,19 @@ def get_conn():
 def init_db():
     with get_conn() as conn:
         conn.executescript("""
+            CREATE TABLE IF NOT EXISTS waitlist (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                email       TEXT NOT NULL UNIQUE,
+                city        TEXT,
+                role        TEXT DEFAULT 'traveller',
+                ref_code    TEXT NOT NULL UNIQUE,
+                referred_by TEXT,
+                created_at  TEXT DEFAULT (datetime('now'))
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_waitlist_ref
+                ON waitlist(ref_code);
+
             CREATE TABLE IF NOT EXISTS vendor_stories (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 vendor_code     TEXT NOT NULL UNIQUE,
@@ -119,6 +132,69 @@ COMMON_ITEMS = {
 
 def get_item_suggestions() -> dict:
     return COMMON_ITEMS
+
+
+# ── Waitlist ──────────────────────────────────────────────────────────────────
+
+def _gen_ref_code() -> str:
+    import secrets, string
+    alphabet = string.ascii_uppercase + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(8))
+
+
+def waitlist_add(email: str, city: str = None, role: str = "traveller",
+                 referred_by: str = None) -> dict:
+    """Add email to waitlist. Returns ref_code and position."""
+    ref_code = _gen_ref_code()
+    with get_conn() as conn:
+        # Verify referred_by code exists
+        if referred_by:
+            row = conn.execute(
+                "SELECT id FROM waitlist WHERE ref_code = ?", (referred_by,)
+            ).fetchone()
+            if not row:
+                referred_by = None  # silently ignore invalid codes
+
+        try:
+            conn.execute("""
+                INSERT INTO waitlist (email, city, role, ref_code, referred_by)
+                VALUES (?, ?, ?, ?, ?)
+            """, (email.lower().strip(), city, role, ref_code, referred_by))
+        except Exception:
+            # Email already exists — fetch existing entry
+            row = conn.execute(
+                "SELECT ref_code FROM waitlist WHERE email = ?",
+                (email.lower().strip(),)
+            ).fetchone()
+            if row:
+                ref_code = row["ref_code"]
+            return {"ref_code": ref_code, "already_registered": True}
+
+        position = conn.execute("SELECT COUNT(*) FROM waitlist").fetchone()[0]
+    return {"ref_code": ref_code, "position": position, "already_registered": False}
+
+
+def waitlist_count() -> int:
+    with get_conn() as conn:
+        return conn.execute("SELECT COUNT(*) FROM waitlist").fetchone()[0]
+
+
+def waitlist_referral_count(ref_code: str) -> int:
+    with get_conn() as conn:
+        return conn.execute(
+            "SELECT COUNT(*) FROM waitlist WHERE referred_by = ?", (ref_code,)
+        ).fetchone()[0]
+
+
+def waitlist_city_counts() -> list[dict]:
+    """Top cities by waitlist interest."""
+    with get_conn() as conn:
+        rows = conn.execute("""
+            SELECT city, COUNT(*) as cnt FROM waitlist
+            WHERE city IS NOT NULL AND city != ''
+            GROUP BY city ORDER BY cnt DESC LIMIT 10
+        """).fetchall()
+    return [dict(r) for r in rows]
 
 
 # ── Vendor stories ────────────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Haggle landing page v2 — city picker, role toggle, live counter, referral success -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -435,6 +436,181 @@ footer {
   padding: 24px;
   font-size: 13px;
 }
+
+/* ── FORM EXTRAS ── */
+.role-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  justify-content: center;
+}
+.role-btn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.role-btn.active {
+  border-color: var(--orange);
+  background: rgba(200,82,80,0.08);
+  color: var(--orange);
+}
+
+.city-select {
+  width: 100%;
+  max-width: 480px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  background: white;
+  color: var(--charcoal);
+  margin-bottom: 12px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+.city-select:focus { outline: none; border-color: var(--orange); }
+
+/* ── LIVE COUNTER ── */
+.live-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.live-dot {
+  width: 8px; height: 8px;
+  background: #4ade80;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── SUCCESS SCREEN ── */
+.success-screen {
+  display: none;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+.success-screen.show { display: block; }
+.success-badge {
+  font-size: 52px;
+  margin-bottom: 12px;
+}
+.success-screen h2 {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.success-screen p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+.ref-box {
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 20px 0;
+}
+.ref-box .ref-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+.ref-url {
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 700;
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+.copy-btn {
+  background: white;
+  color: var(--orange);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.copy-btn:hover { background: var(--cream); }
+.position-chip {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 8px 0 16px;
+}
+.ref-note {
+  font-size: 13px;
+  opacity: 0.75;
+  margin-top: 10px;
+}
+
+/* ── CITY DEMAND STRIP ── */
+.demand-strip {
+  background: white;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 24px;
+  text-align: center;
+}
+.demand-strip h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+.demand-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.demand-city {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+}
+.demand-city .demand-bar {
+  height: 6px;
+  background: var(--orange);
+  border-radius: 3px;
+  min-width: 8px;
+}
 </style>
 </head>
 <body>
@@ -447,32 +623,75 @@ footer {
 <!-- ── HERO ─────────────────────────────────────────────── -->
 <section class="hero" id="waitlist">
   <div class="hero-eyebrow">Currently in beta · Free forever</div>
+
+  <!-- Live counter -->
+  <div class="live-counter">
+    <div class="live-dot"></div>
+    <span id="live-count">Loading…</span> people on the waitlist
+  </div>
+
   <h1>Never overpay at a<br><em>market again.</em></h1>
   <p>
     Community prices, AI negotiation scripts, and local wage context —
     so you haggle fair, not cheap. Good for you. Good for vendors.
   </p>
 
-  <form class="waitlist-form" onsubmit="joinWaitlist(event)">
-    <input type="email" id="email-input" placeholder="your@email.com" required />
-    <button type="submit" class="waitlist-btn" id="join-btn">Get Early Access</button>
-  </form>
+  <!-- Sign-up form -->
+  <div id="signup-form" style="width:100%;max-width:480px;">
 
-  <div class="success-msg" id="success-msg">
-    🎉 You're on the list! We'll email you when Haggle launches.
-  </div>
-
-  <p class="hero-note"><strong>Free forever.</strong> No spam. Unsubscribe anytime.</p>
-
-  <div class="signups-bar">
-    <div class="avatars">
-      <div class="avatar">🌍</div>
-      <div class="avatar">🎒</div>
-      <div class="avatar">✈️</div>
-      <div class="avatar">🗺️</div>
+    <!-- Role toggle -->
+    <div class="role-toggle">
+      <button type="button" class="role-btn active" onclick="setRole('traveller',this)">🎒 Traveller</button>
+      <button type="button" class="role-btn" onclick="setRole('vendor',this)">🎨 Vendor / Artisan</button>
+      <button type="button" class="role-btn" onclick="setRole('both',this)">Both</button>
     </div>
-    <span>Join travellers already on the waitlist</span>
+
+    <!-- City interest -->
+    <select class="city-select" id="city-select">
+      <option value="">Which city are you heading to? (optional)</option>
+      <option value="Bangkok">Bangkok, Thailand</option>
+      <option value="Marrakech">Marrakech, Morocco</option>
+      <option value="Istanbul">Istanbul, Turkey</option>
+      <option value="Bali">Bali, Indonesia</option>
+      <option value="Delhi">Delhi, India</option>
+      <option value="Cairo">Cairo, Egypt</option>
+      <option value="Mexico City">Mexico City, Mexico</option>
+      <option value="Hanoi">Hanoi, Vietnam</option>
+      <option value="Chiang Mai">Chiang Mai, Thailand</option>
+      <option value="Cusco">Cusco, Peru</option>
+      <option value="Nairobi">Nairobi, Kenya</option>
+      <option value="Dubai">Dubai, UAE</option>
+      <option value="Kathmandu">Kathmandu, Nepal</option>
+      <option value="Other">Other city</option>
+    </select>
+
+    <form class="waitlist-form" onsubmit="joinWaitlist(event)">
+      <input type="email" id="email-input" placeholder="your@email.com" required />
+      <button type="submit" class="waitlist-btn" id="join-btn">Get Early Access</button>
+    </form>
+
+    <p class="hero-note"><strong>Free forever.</strong> No spam. Unsubscribe anytime.</p>
   </div>
+
+  <!-- Success screen -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-badge">🎉</div>
+    <h2>You're on the list!</h2>
+    <p>We'll reach out before launch.</p>
+    <div class="position-chip" id="position-chip">You're #— on the waitlist</div>
+    <div class="ref-box">
+      <div class="ref-label">Your referral link — share it to move up</div>
+      <div class="ref-url" id="ref-url">haggle.app/?ref=…</div>
+      <button class="copy-btn" onclick="copyRef()">Copy link</button>
+      <p class="ref-note">Each person you refer bumps you higher on the list.</p>
+    </div>
+    <p style="font-size:14px; opacity:0.8;">
+      Follow us for updates:
+      <a href="#" style="color:white; text-decoration:underline;">Instagram</a> ·
+      <a href="#" style="color:white; text-decoration:underline;">LinkedIn</a>
+    </p>
+  </div>
+
 </section>
 
 <!-- ── CITIES STRIP ─────────────────────────────────────── -->
@@ -639,15 +858,39 @@ footer {
   </div>
 </div>
 
+<!-- ── CITY DEMAND ──────────────────────────────────────── -->
+<div class="demand-strip" id="demand-strip" style="display:none;">
+  <h3>Most requested cities</h3>
+  <div class="demand-cities" id="demand-cities"></div>
+</div>
+
 <!-- ── FOOTER CTA ───────────────────────────────────────── -->
 <div class="footer-cta">
   <h2>Be first to know when we launch.</h2>
   <p>Free forever. Supported by local tourism ads — never your data.</p>
-  <form class="waitlist-form" onsubmit="joinWaitlist(event)" style="margin:0 auto 16px;">
-    <input type="email" id="email-input-2" placeholder="your@email.com" required />
-    <button type="submit" class="waitlist-btn" id="join-btn-2">Join Waitlist</button>
-  </form>
-  <p class="hero-note">No spam. Unsubscribe anytime.</p>
+
+  <div id="footer-form">
+    <div class="role-toggle" style="justify-content:center; margin-bottom:12px;">
+      <button type="button" class="role-btn active" style="border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.8);background:rgba(255,255,255,0.15);" onclick="setRole('traveller',this)">🎒 Traveller</button>
+      <button type="button" class="role-btn" style="border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.8);background:rgba(255,255,255,0.15);" onclick="setRole('vendor',this)">🎨 Vendor</button>
+    </div>
+    <form class="waitlist-form" onsubmit="joinWaitlist(event)" style="margin:0 auto 12px;">
+      <input type="email" id="email-input-2" placeholder="your@email.com" required />
+      <button type="submit" class="waitlist-btn" id="join-btn-2">Join Waitlist</button>
+    </form>
+    <p class="hero-note">No spam. Unsubscribe anytime.</p>
+  </div>
+
+  <div class="success-screen" id="footer-success" style="color:white;">
+    <div class="success-badge">🎉</div>
+    <h2 style="color:white;">You're on the list!</h2>
+    <p>We'll be in touch before launch.</p>
+    <div class="ref-box" id="footer-ref-box" style="display:none;">
+      <div class="ref-label">Your referral link</div>
+      <div class="ref-url" id="footer-ref-url"></div>
+      <button class="copy-btn" onclick="copyFooterRef()">Copy link</button>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -655,31 +898,151 @@ footer {
 </footer>
 
 <script>
+// ── State ────────────────────────────────────────────────────
+let selectedRole = 'traveller';
+let myRefCode = null;
+
+// ── Role toggle ──────────────────────────────────────────────
+function setRole(role, btn) {
+  selectedRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// ── Ref code from URL ─────────────────────────────────────────
+function getRefFromUrl() {
+  return new URLSearchParams(window.location.search).get('ref') || null;
+}
+
+// ── Live counter ──────────────────────────────────────────────
+async function loadCounter() {
+  try {
+    const r = await fetch('/api/waitlist/count');
+    const d = await r.json();
+    const n = d.count;
+    const el = document.getElementById('live-count');
+    if (el) el.textContent = n.toLocaleString();
+  } catch {}
+}
+
+// ── City demand ───────────────────────────────────────────────
+async function loadCityDemand() {
+  try {
+    const r = await fetch('/api/waitlist/cities');
+    const d = await r.json();
+    if (!d.cities || !d.cities.length) return;
+
+    const strip = document.getElementById('demand-strip');
+    const container = document.getElementById('demand-cities');
+    const max = d.cities[0].cnt;
+
+    container.innerHTML = d.cities.map(c => `
+      <div class="demand-city">
+        ${c.city}
+        <div class="demand-bar" style="width:${Math.max(8, (c.cnt / max) * 60)}px"></div>
+        <span style="font-size:11px;color:var(--muted);">${c.cnt}</span>
+      </div>
+    `).join('');
+
+    strip.style.display = 'block';
+  } catch {}
+}
+
+// ── Join waitlist ─────────────────────────────────────────────
 async function joinWaitlist(e) {
   e.preventDefault();
-  const email = (document.getElementById('email-input') || document.getElementById('email-input-2')).value;
-  const btn = document.getElementById('join-btn') || document.getElementById('join-btn-2');
+  const form = e.target;
+  const isFooter = form.closest('#footer-form') !== null;
+
+  const emailId = isFooter ? 'email-input-2' : 'email-input';
+  const btnId   = isFooter ? 'join-btn-2'    : 'join-btn';
+
+  const email = document.getElementById(emailId).value.trim();
+  const btn   = document.getElementById(btnId);
+  const city  = !isFooter
+    ? (document.getElementById('city-select').value || null)
+    : null;
+
   btn.disabled = true;
   btn.textContent = 'Joining…';
 
   try {
     const res = await fetch('/api/waitlist', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ email })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        city,
+        role: selectedRole,
+        ref: getRefFromUrl(),
+      }),
     });
-    if (res.ok) {
-      document.querySelector('.waitlist-form').style.display = 'none';
-      document.getElementById('success-msg').style.display = 'block';
+
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    myRefCode = data.ref_code;
+    const shareUrl = `${location.origin}/?ref=${data.ref_code}`;
+
+    if (isFooter) {
+      document.getElementById('footer-form').style.display = 'none';
+      const succ = document.getElementById('footer-success');
+      succ.classList.add('show');
+      const refBox = document.getElementById('footer-ref-box');
+      document.getElementById('footer-ref-url').textContent = shareUrl;
+      refBox.style.display = 'block';
     } else {
-      btn.disabled = false;
-      btn.textContent = 'Get Early Access';
+      document.getElementById('signup-form').style.display = 'none';
+      const succ = document.getElementById('success-screen');
+      succ.classList.add('show');
+
+      const pos = data.position || '—';
+      document.getElementById('position-chip').textContent =
+        `You're #${pos.toLocaleString()} on the waitlist`;
+      document.getElementById('ref-url').textContent = shareUrl;
     }
+
+    // Refresh counter
+    loadCounter();
+    loadCityDemand();
+
   } catch {
     btn.disabled = false;
-    btn.textContent = 'Get Early Access';
+    btn.textContent = isFooter ? 'Join Waitlist' : 'Get Early Access';
+    alert('Something went wrong. Please try again.');
   }
 }
+
+// ── Copy referral link ────────────────────────────────────────
+function copyRef() {
+  const url = document.getElementById('ref-url').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => btn.textContent = 'Copy link', 2000);
+  });
+}
+
+function copyFooterRef() {
+  const url = document.getElementById('footer-ref-url').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('#footer-ref-box .copy-btn');
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => btn.textContent = 'Copy link', 2000);
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────
+(async function init() {
+  loadCounter();
+  loadCityDemand();
+
+  // Pre-fill ref code context if someone arrived via a referral
+  const ref = getRefFromUrl();
+  if (ref) {
+    const eyebrow = document.querySelector('.hero-eyebrow');
+    if (eyebrow) eyebrow.textContent = '👋 You were invited — get early access';
+  }
+})();
 </script>
 
 </body>
