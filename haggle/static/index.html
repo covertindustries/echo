@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haggle — The Negotiator's App</title>
+<style>
+:root {
+  --terracotta: #C85250;
+  --terracotta-dark: #a33f3d;
+  --gold: #D4A853;
+  --gold-light: #f0c96a;
+  --cream: #F9F1E4;
+  --sand: #EEE0C8;
+  --charcoal: #2D2D2D;
+  --muted: #666;
+  --border: #ddd0bc;
+  --white: #fff;
+  --green: #3d8c5c;
+  --blue: #2d6ea8;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.10);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  min-height: 100vh;
+}
+
+/* ─── Header ─────────────────────────────────────────────── */
+header {
+  background: var(--terracotta);
+  color: white;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.logo-icon { font-size: 26px; }
+
+.tagline {
+  font-size: 13px;
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+nav {
+  display: flex;
+  gap: 4px;
+}
+
+nav button {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.85);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+nav button:hover, nav button.active {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+/* ─── Layout ─────────────────────────────────────────────── */
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  nav .tagline { display: none; }
+}
+
+/* ─── Cards ──────────────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  border: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title .icon { font-size: 22px; }
+
+/* ─── Tabs ───────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  background: var(--sand);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+
+.tab.active {
+  background: white;
+  color: var(--terracotta);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+
+/* ─── Forms ──────────────────────────────────────────────── */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 500px) {
+  .form-row { grid-template-columns: 1fr; }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+label .hint {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+input, select, textarea {
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--charcoal);
+  background: white;
+  transition: border-color 0.15s;
+  width: 100%;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--terracotta);
+}
+
+textarea { resize: vertical; min-height: 70px; }
+
+.price-input-row {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 8px;
+}
+
+/* ─── Buttons ────────────────────────────────────────────── */
+.btn {
+  padding: 11px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--terracotta);
+  color: white;
+}
+
+.btn-primary:hover { background: var(--terracotta-dark); }
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background: white;
+  color: var(--terracotta);
+  border: 1.5px solid var(--terracotta);
+}
+
+.btn-outline:hover { background: var(--cream); }
+
+.btn-full { width: 100%; justify-content: center; }
+
+/* ─── Stats bar ──────────────────────────────────────────── */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 16px 0;
+  background: var(--cream);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--terracotta);
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ─── Price list ──────────────────────────────────────────── */
+.price-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.price-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--cream);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.price-item .amount {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--green);
+}
+
+.price-item .meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  margin-left: 12px;
+}
+
+.price-item .area {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.price-item .source {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.source-community { background: #dff0e8; color: #2d7a52; }
+.source-reddit { background: #ffe8e0; color: #c84026; }
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── AI Output ──────────────────────────────────────────── */
+.ai-output {
+  background: #f8f4ff;
+  border: 1.5px solid #d8ccf5;
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-top: 16px;
+  min-height: 60px;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.ai-output .placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.ai-typing::after {
+  content: '▋';
+  animation: blink 0.7s infinite;
+  color: var(--terracotta);
+}
+
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Markdown-style rendering */
+.ai-output h2 {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--terracotta);
+  margin: 14px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #d8ccf5;
+}
+
+.ai-output h2:first-child { margin-top: 0; }
+
+.ai-output p { margin-bottom: 8px; }
+
+.ai-output ul, .ai-output ol {
+  padding-left: 18px;
+  margin-bottom: 8px;
+}
+
+.ai-output li { margin-bottom: 4px; }
+
+.ai-output strong { color: var(--charcoal); }
+
+/* ─── Ads sidebar ────────────────────────────────────────── */
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+.ad-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.ad-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.ad-card .ad-category {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--sand);
+  color: var(--muted);
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+.ad-card .ad-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: var(--charcoal);
+}
+
+.ad-card .ad-tagline {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.ad-card a {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--terracotta);
+  text-decoration: none;
+}
+
+.ad-card a:hover { text-decoration: underline; }
+
+.privacy-note {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--sand);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.privacy-note strong { color: var(--charcoal); }
+
+/* ─── Toast ──────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--charcoal);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 1000;
+  max-width: 320px;
+  text-align: center;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.success { background: var(--green); }
+.toast.error { background: #c0392b; }
+
+/* ─── Empty / loading states ─────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--muted);
+}
+
+.empty .empty-icon { font-size: 36px; margin-bottom: 8px; }
+.empty p { font-size: 14px; }
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Price range indicator ──────────────────────────────── */
+.range-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin: 8px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.range-fill {
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: 3px;
+  left: 0;
+  right: 0;
+}
+
+/* ─── Page views ─────────────────────────────────────────── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ─── Hero ───────────────────────────────────────────────── */
+.hero {
+  background: linear-gradient(135deg, var(--terracotta), #8b3a39);
+  color: white;
+  border-radius: var(--radius);
+  padding: 32px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.hero p {
+  font-size: 15px;
+  opacity: 0.9;
+  margin-bottom: 20px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+}
+
+.hero-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.city-pill {
+  background: rgba(255,255,255,0.18);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  color: white;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.city-pill:hover { background: rgba(255,255,255,0.3); }
+
+/* ─── Section header ─────────────────────────────────────── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.badge {
+  background: var(--sand);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge.success { background: #dff0e8; color: var(--green); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">🤝</span>
+    <div>
+      <div>Haggle</div>
+      <div class="tagline">Know before you negotiate</div>
+    </div>
+  </div>
+  <nav>
+    <button class="tab active" onclick="showView('search')">🔍 Search</button>
+    <button class="tab" onclick="showView('negotiate')">💬 Negotiate</button>
+    <button class="tab" onclick="showView('submit')">📤 Submit Price</button>
+  </nav>
+</header>
+
+<div class="layout">
+  <main>
+
+    <!-- ── SEARCH VIEW ─────────────────────────────────────── -->
+    <div id="view-search" class="view active">
+      <div class="hero">
+        <h1>What should you pay?</h1>
+        <p>Search real prices paid by travelers. Community-sourced, anonymous, and always free.</p>
+        <div class="hero-cities">
+          <button class="city-pill" onclick="quickSearch('silk scarf','Bangkok')">Bangkok</button>
+          <button class="city-pill" onclick="quickSearch('leather bag','Marrakech')">Marrakech</button>
+          <button class="city-pill" onclick="quickSearch('ceramic bowl','Istanbul')">Istanbul</button>
+          <button class="city-pill" onclick="quickSearch('pashmina shawl','Delhi')">Delhi</button>
+          <button class="city-pill" onclick="quickSearch('batik sarong','Bali')">Bali</button>
+          <button class="city-pill" onclick="quickSearch('papyrus art','Cairo')">Cairo</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🔍</span> Search Prices</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Item</label>
+            <input id="search-item" type="text" placeholder="e.g. leather bag, silk scarf…" />
+          </div>
+          <div class="form-group">
+            <label>City</label>
+            <input id="search-city" type="text" placeholder="e.g. Marrakech, Bangkok…" />
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="searchPrices()" id="search-btn">
+            Search Prices
+          </button>
+          <button class="btn btn-outline" onclick="prefillNegotiate()">
+            Get Negotiation Help →
+          </button>
+        </div>
+
+        <div id="search-results" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
+    <!-- ── NEGOTIATE VIEW ──────────────────────────────────── -->
+    <div id="view-negotiate" class="view">
+      <div class="card">
+        <div class="card-title"><span class="icon">💬</span> Get Your Negotiation Script</div>
+        <p style="font-size:14px; color:var(--muted); margin-bottom:18px;">
+          Enter what the vendor said and their asking price. Get AI-powered advice on exactly what to say and what to pay.
+        </p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Item you're buying</label>
+            <input id="neg-item" type="text" placeholder="e.g. leather bag" />
+          </div>
+          <div class="form-group">
+            <label>Market / City</label>
+            <input id="neg-city" type="text" placeholder="e.g. Marrakech" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>What did the vendor say? <span class="hint">(their opening pitch or quoted price)</span></label>
+          <textarea id="neg-opening" placeholder='e.g. "For you my friend, special price — 600 dirham!"'></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Their asking price</label>
+            <div class="price-input-row">
+              <input id="neg-price" type="number" min="0" step="0.01" placeholder="0.00" />
+              <select id="neg-currency"></select>
+            </div>
+          </div>
+          <div style="display:flex; align-items:flex-end; padding-bottom:12px;">
+            <button class="btn btn-primary btn-full" onclick="getNegotiationAdvice()" id="neg-btn">
+              Get My Script
+            </button>
+          </div>
+        </div>
+
+        <div id="neg-output" class="ai-output">
+          <div class="placeholder">Your personalised haggling script will appear here…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SUBMIT VIEW ─────────────────────────────────────── -->
+    <div id="view-submit" class="view">
+      <div class="card">
+        <div class="card-title"><span class="icon">📤</span> Share What You Paid</div>
+        <p style="font-size:14px; color:var(--muted); margin-bottom:6px;">
+          Help fellow travelers know what's fair. <strong>We protect vendors</strong> — no shop names,
+          no exact addresses, just the neighbourhood and item.
+        </p>
+
+        <div class="privacy-note">
+          🔒 <strong>Privacy first:</strong> We never store vendor names or exact locations.
+          Only city and general area are recorded. This protects local businesses while helping travellers.
+        </div>
+
+        <div style="height:16px;"></div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>What did you buy?</label>
+            <input id="sub-item" type="text" placeholder="e.g. leather bag" />
+          </div>
+          <div class="form-group">
+            <label>City</label>
+            <input id="sub-city" type="text" placeholder="e.g. Marrakech" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Country</label>
+            <input id="sub-country" type="text" placeholder="e.g. Morocco" />
+          </div>
+          <div class="form-group">
+            <label>General Area <span class="hint">(no vendor names!)</span></label>
+            <input id="sub-area" type="text" placeholder="e.g. Old Medina, near tanneries" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price you paid</label>
+            <div class="price-input-row">
+              <input id="sub-price" type="number" min="0" step="0.01" placeholder="0.00" />
+              <select id="sub-currency"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Condition</label>
+            <select id="sub-condition">
+              <option value="new">New</option>
+              <option value="haggled">Haggled</option>
+              <option value="fixed_price">Fixed Price</option>
+              <option value="used">Used / Second-hand</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notes <span class="hint">(optional — tip for others, what you got for the price, etc.)</span></label>
+          <textarea id="sub-notes" placeholder="e.g. Beautiful hand-stitched bag, paid half the asking price after 10 mins of negotiating. Worth it!"></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="submitPrice()" id="sub-btn">
+          Submit Price Report
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── SIDEBAR ──────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="ad-label">Supported by local tourism</div>
+    <div id="ads-container">
+      <!-- Loaded dynamically -->
+    </div>
+    <div class="privacy-note" style="background:white; border:1px solid var(--border);">
+      <strong>Free forever.</strong> Haggle is supported by local tourism ads — never your data.
+      Ads are only for tourism businesses, never for vendors listed in the app.
+    </div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = '';
+let currentCurrency = 'USD';
+let searchState = { item: '', city: '' };
+
+// ── Utilities ─────────────────────────────────────────────────
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(`view-${name}`).classList.add('active');
+  document.querySelectorAll('nav .tab').forEach((b, i) => {
+    b.classList.toggle('active', ['search','negotiate','submit'][i] === name);
+  });
+}
+
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function fmt(price, currency = 'USD') {
+  const symbols = { USD:'$', EUR:'€', GBP:'£', JPY:'¥', CNY:'¥', INR:'₹',
+    THB:'฿', MXN:'$', BRL:'R$', TRY:'₺', IDR:'Rp ', VND:'₫', PHP:'₱',
+    KES:'KSh ', NGN:'₦', ZAR:'R', AED:'د.إ ', SGD:'S$', HKD:'HK$' };
+  const s = symbols[currency] || currency + ' ';
+  if (['JPY','IDR','VND','KES','NGN'].includes(currency))
+    return s + Math.round(price).toLocaleString();
+  return s + parseFloat(price).toFixed(2);
+}
+
+function renderMarkdown(text) {
+  return text
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^(?!<[hup])/gm, '')
+    .trim();
+}
+
+// ── Currency loader ────────────────────────────────────────────
+async function loadCurrencies() {
+  try {
+    const res = await fetch('/api/currencies');
+    const data = await res.json();
+    const selects = ['neg-currency', 'sub-currency'];
+    selects.forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      sel.innerHTML = '';
+      Object.entries(data.supported).forEach(([code, name]) => {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = code;
+        opt.title = name;
+        if (code === 'USD') opt.selected = true;
+        sel.appendChild(opt);
+      });
+    });
+  } catch (e) {
+    console.warn('Currency load failed', e);
+  }
+}
+
+// ── Ads loader ─────────────────────────────────────────────────
+async function loadAds(city = 'global') {
+  try {
+    const res = await fetch(`/api/ads?city=${encodeURIComponent(city)}`);
+    const data = await res.json();
+    const container = document.getElementById('ads-container');
+    if (!data.ads.length) {
+      container.innerHTML = '';
+      return;
+    }
+    container.innerHTML = data.ads.map(ad => `
+      <div class="ad-card">
+        <span class="ad-category">${ad.category || 'tourism'}</span>
+        <div class="ad-title">${ad.title}</div>
+        <div class="ad-tagline">${ad.tagline || ''}</div>
+        <a href="${ad.link || '#'}" target="_blank" rel="noopener">Learn more →</a>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.warn('Ads load failed', e);
+  }
+}
+
+// ── Search ─────────────────────────────────────────────────────
+function quickSearch(item, city) {
+  document.getElementById('search-item').value = item;
+  document.getElementById('search-city').value = city;
+  searchPrices();
+}
+
+async function searchPrices() {
+  const item = document.getElementById('search-item').value.trim();
+  const city = document.getElementById('search-city').value.trim();
+
+  if (!item || !city) {
+    toast('Please enter both an item and a city', 'error');
+    return;
+  }
+
+  searchState = { item, city };
+  const btn = document.getElementById('search-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Searching…';
+
+  const results = document.getElementById('search-results');
+  results.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><p>Searching community data and Reddit…</p></div>';
+
+  try {
+    const res = await fetch(`/api/prices?item=${encodeURIComponent(item)}&city=${encodeURIComponent(city)}`);
+    const data = await res.json();
+    renderSearchResults(data);
+    loadAds(city);
+  } catch (e) {
+    results.innerHTML = '<div class="empty"><div class="empty-icon">❌</div><p>Search failed. Please try again.</p></div>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Search Prices';
+  }
+}
+
+function renderSearchResults(data) {
+  const el = document.getElementById('search-results');
+  const { community_reports, reddit_data, stats, item, city } = data;
+  const total = community_reports.length + reddit_data.length;
+
+  if (total === 0) {
+    el.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🔍</div>
+        <p>No data yet for <strong>${item}</strong> in <strong>${city}</strong>.</p>
+        <p style="margin-top:8px;">Be the first to submit a price!</p>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+
+  // Stats bar
+  if (stats) {
+    html += `
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-label">Low</div>
+        <div class="stat-value">${fmt(stats.low)}</div>
+        <div class="stat-sub">USD</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Median</div>
+        <div class="stat-value">${fmt(stats.median)}</div>
+        <div class="stat-sub">USD</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">High</div>
+        <div class="stat-value">${fmt(stats.high)}</div>
+        <div class="stat-sub">USD • ${stats.count} reports</div>
+      </div>
+    </div>
+    <div class="range-bar"><div class="range-fill"></div></div>`;
+  }
+
+  // Community reports
+  if (community_reports.length > 0) {
+    html += `<div class="section-divider">Community Reports (${community_reports.length})</div>`;
+    html += '<div class="price-list">';
+    community_reports.forEach(r => {
+      html += `
+      <div class="price-item">
+        <div class="amount">${fmt(r.price, r.currency)}</div>
+        <div class="meta">
+          <div>${r.fuzzy_area || r.city}</div>
+          <div class="area">${r.city}${r.country ? ', ' + r.country : ''} · ${r.condition || 'new'}</div>
+        </div>
+        <span class="source source-community">community</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Reddit data
+  if (reddit_data.length > 0) {
+    html += `<div class="section-divider">From Reddit (${reddit_data.length})</div>`;
+    html += '<div class="price-list">';
+    reddit_data.forEach(r => {
+      html += `
+      <div class="price-item">
+        <div class="amount">${fmt(r.price, r.currency)}</div>
+        <div class="meta">
+          <div style="font-size:12px;">${r.snippet?.substring(0, 90)}…</div>
+          <div class="area">r/${r.subreddit}</div>
+        </div>
+        <span class="source source-reddit">reddit</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // CTA
+  html += `
+  <div style="display:flex; gap:8px; margin-top:16px;">
+    <button class="btn btn-primary" onclick="prefillNegotiate()" style="flex:1;">
+      💬 Get Negotiation Script
+    </button>
+    <button class="btn btn-outline" onclick="prefillSubmit()" style="flex:1;">
+      📤 Submit Your Price
+    </button>
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+function prefillNegotiate() {
+  if (searchState.item) {
+    document.getElementById('neg-item').value = searchState.item;
+    document.getElementById('neg-city').value = searchState.city;
+  }
+  showView('negotiate');
+  document.getElementById('neg-opening').focus();
+}
+
+function prefillSubmit() {
+  if (searchState.item) {
+    document.getElementById('sub-item').value = searchState.item;
+    document.getElementById('sub-city').value = searchState.city;
+  }
+  showView('submit');
+}
+
+// ── Negotiate ──────────────────────────────────────────────────
+async function getNegotiationAdvice() {
+  const item = document.getElementById('neg-item').value.trim();
+  const city = document.getElementById('neg-city').value.trim();
+  const opening = document.getElementById('neg-opening').value.trim();
+  const price = parseFloat(document.getElementById('neg-price').value);
+  const currency = document.getElementById('neg-currency').value;
+
+  if (!item || !city || !opening || !price) {
+    toast('Please fill in all fields', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('neg-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Thinking…';
+
+  const output = document.getElementById('neg-output');
+  output.innerHTML = '';
+  output.className = 'ai-output ai-typing';
+
+  let fullText = '';
+
+  try {
+    const res = await fetch('/api/negotiate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item, city, vendor_opening: opening, asking_price: price, currency }),
+    });
+
+    if (!res.ok) throw new Error('Request failed');
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const msg = JSON.parse(line.slice(6));
+          if (msg.error) {
+            output.className = 'ai-output';
+            output.innerHTML = `<div style="color:#c0392b;">⚠️ ${msg.error}</div>`;
+            return;
+          }
+          if (msg.done) {
+            output.className = 'ai-output';
+            output.innerHTML = renderMarkdown(fullText);
+            return;
+          }
+          if (msg.text) {
+            fullText += msg.text;
+            output.textContent = fullText;
+          }
+        } catch {}
+      }
+    }
+  } catch (e) {
+    output.className = 'ai-output';
+    output.innerHTML = `<div style="color:#c0392b;">⚠️ Failed to get advice. Check your API key in .env</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Get My Script';
+  }
+}
+
+// ── Submit ─────────────────────────────────────────────────────
+async function submitPrice() {
+  const item = document.getElementById('sub-item').value.trim();
+  const city = document.getElementById('sub-city').value.trim();
+  const country = document.getElementById('sub-country').value.trim();
+  const area = document.getElementById('sub-area').value.trim();
+  const price = parseFloat(document.getElementById('sub-price').value);
+  const currency = document.getElementById('sub-currency').value;
+  const condition = document.getElementById('sub-condition').value;
+  const notes = document.getElementById('sub-notes').value.trim();
+
+  if (!item || !city || !price) {
+    toast('Item, city, and price are required', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('sub-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+  try {
+    const res = await fetch('/api/prices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item, city, country, price, currency, condition, fuzzy_area: area, notes }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Submission failed');
+    }
+
+    toast('Price submitted! Thank you for helping the community 🙌', 'success');
+
+    // Reset form
+    ['sub-item','sub-city','sub-country','sub-area','sub-price','sub-notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+  } catch (e) {
+    toast(e.message || 'Submission failed', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit Price Report';
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────────
+(async function init() {
+  await loadCurrencies();
+  await loadAds();
+
+  // Enter key in search
+  ['search-item', 'search-city'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') searchPrices();
+    });
+  });
+})();
+</script>
+</body>
+</html>
